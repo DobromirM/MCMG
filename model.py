@@ -126,7 +126,10 @@ class Model(Module):
         self.regi_dist_embedding=nn.Embedding(self.regi_dist_n_node, self.hidden_size)
         self.emb_dropout = torch.nn.Dropout(p=self.dropout_fwd)
         self.gcn = GCN(self.hidden_size, self.step,self.drop_out)
-        self.multihead_attn = nn.MultiheadAttention(self.hidden_size, self.n_head).cuda()
+        if torch.cuda.is_available():
+            self.multihead_attn = nn.MultiheadAttention(self.hidden_size, self.n_head).cuda()
+        else:
+            self.multihead_attn = nn.MultiheadAttention(self.hidden_size, self.n_head).cpu()
         self.ffn=PointWiseFeedForward(self.hidden_size,self.dropout_fwd)
         self.pe = PositionEmbedding(len_max, self.hidden_size)
         self.loss_function = nn.CrossEntropyLoss()
