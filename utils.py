@@ -547,11 +547,11 @@ def trans_to_cpu(variable):
         return variable
 
 
-def slice_data(data, max):
+def slice_data(data, idxs):
     new_data = list()
 
     for elem in data:
-        new_data.append(elem[:max])
+        new_data.append([elem[i] for i in idxs])
 
     return tuple(new_data)
 

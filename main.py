@@ -14,13 +14,12 @@ def main():
     process_data = True
     if process_data:
         df = pd.read_csv("./dataset/CAL/CAL_checkin.csv")
-        print(df)
         train, _, _, test = get_tr_va_te_data(df)
 
-        # num_clients = 10
+        client_idxs = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 
-        # train = slice_data(train, num_clients)
-        # test = slice_data(test, num_clients)
+        train = slice_data(train, client_idxs)
+        test = slice_data(test, client_idxs)
 
         train_data = increase_data(flatten_data(train))
         test_data = increase_data(flatten_data(test))
@@ -30,14 +29,14 @@ def main():
 
         test_regions = get_In_Cross_region_seq(test[4])
         group_label_test = flatten_data((test_regions,))[0]
-        POI_n_node = max(map(max, train_data[0])) + 1
+        POI_n_node = max(max(train_data[1]), max(map(max, train_data[0]))) + 1
         POI_adj_matrix = get_adj_matrix_InDegree(train_data[0], POI_n_node)
 
-        cate_n_node = 149
-        regi_n_node = 10
-        time_n_node = 25
-        POI_dist_n_node = 31
-        regi_dist_n_node = 31
+        cate_n_node = max(max(train_data[3]), max(map(max, train_data[2]))) + 1
+        regi_n_node = max(max(train_data[5]), max(map(max, train_data[4]))) + 1
+        time_n_node = max(max(train_data[7]), max(map(max, train_data[6]))) + 1
+        POI_dist_n_node = max(max(train_data[9]), max(map(max, train_data[8]))) + 1
+        regi_dist_n_node = max(max(train_data[11]), max(map(max, train_data[10]))) + 1
 
 
     elif args.dataset == 'CAL':
