@@ -352,22 +352,24 @@ def get_tr_va_te_data(data):
         regi_distance_training_validation_samples)
 
     user_train = (
-    POI_train_pre, POI_train_target, category_train_pre, category_train_target, region_train_pre, region_train_target,
-    time_train_pre, time_train_target, POI_distance_train_pre, POI_distance_train_target, regi_distance_train_pre,
-    regi_distance_train_target)
+        POI_train_pre, POI_train_target, category_train_pre, category_train_target, region_train_pre,
+        region_train_target,
+        time_train_pre, time_train_target, POI_distance_train_pre, POI_distance_train_target, regi_distance_train_pre,
+        regi_distance_train_target)
     user_valid = (
-    POI_valid_pre, POI_valid_target, category_valid_pre, category_valid_target, region_valid_pre, region_valid_target,
-    time_valid_pre, time_valid_target, POI_distance_valid_pre, POI_distance_valid_target, regi_distance_valid_pre,
-    regi_distance_valid_target)
+        POI_valid_pre, POI_valid_target, category_valid_pre, category_valid_target, region_valid_pre,
+        region_valid_target,
+        time_valid_pre, time_valid_target, POI_distance_valid_pre, POI_distance_valid_target, regi_distance_valid_pre,
+        regi_distance_valid_target)
     user_train_valid = (
-    POI_train_valid_pre, POI_train_valid_target, category_train_valid_pre, category_train_valid_target,
-    region_train_valid_pre, region_train_valid_target, time_train_valid_pre, time_train_valid_target,
-    POI_distance_train_valid_pre, POI_distance_train_valid_target, regi_distance_train_valid_pre,
-    regi_distance_train_valid_target)
+        POI_train_valid_pre, POI_train_valid_target, category_train_valid_pre, category_train_valid_target,
+        region_train_valid_pre, region_train_valid_target, time_train_valid_pre, time_train_valid_target,
+        POI_distance_train_valid_pre, POI_distance_train_valid_target, regi_distance_train_valid_pre,
+        regi_distance_train_valid_target)
     user_test = (
-    POI_test_pre, POI_test_target, category_test_pre, category_test_target, region_test_pre, region_test_target,
-    time_test_pre, time_test_target, POI_distance_test_pre, POI_distance_test_target, regi_distance_test_pre,
-    regi_distance_test_target)
+        POI_test_pre, POI_test_target, category_test_pre, category_test_target, region_test_pre, region_test_target,
+        time_test_pre, time_test_target, POI_distance_test_pre, POI_distance_test_target, regi_distance_test_pre,
+        regi_distance_test_target)
 
     return user_train, user_valid, user_train_valid, user_test
 
