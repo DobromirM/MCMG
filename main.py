@@ -11,7 +11,36 @@ args = parse_args()
 
 
 def main():
-    if args.dataset == 'CAL':
+    process_data = True
+    if process_data:
+        df = pd.read_csv("./dataset/CAL/CAL_checkin.csv")
+        print(df)
+        train, _, _, test = get_tr_va_te_data(df)
+
+        # num_clients = 10
+
+        # train = slice_data(train, num_clients)
+        # test = slice_data(test, num_clients)
+
+        train_data = increase_data(flatten_data(train))
+        test_data = increase_data(flatten_data(test))
+
+        train_regions = get_In_Cross_region_seq(train[4])
+        group_label_train = flatten_data((train_regions,))[0]
+
+        test_regions = get_In_Cross_region_seq(test[4])
+        group_label_test = flatten_data((test_regions,))[0]
+        POI_n_node = max(map(max, train_data[0])) + 1
+        POI_adj_matrix = get_adj_matrix_InDegree(train_data[0], POI_n_node)
+
+        cate_n_node = 149
+        regi_n_node = 10
+        time_n_node = 25
+        POI_dist_n_node = 31
+        regi_dist_n_node = 31
+
+
+    elif args.dataset == 'CAL':
         train_data = pickle.load(open('./dataset/CAL/train_CAL.txt', 'rb'))
         test_data = pickle.load(open('./dataset/CAL/test_CAL.txt', 'rb'))
         group_label_train = pickle.load(open('./dataset/CAL/train_group_label_CAL.txt', 'rb'))

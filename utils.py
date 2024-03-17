@@ -15,7 +15,7 @@ import progressbar
 def generate_sequence(input_data, min_seq_len, min_seq_num):
     bar = progressbar.ProgressBar(maxval=input_data.index[-1],
                                   widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
-    input_data['Local_sg_time'] = pd.to_datetime(input_data['Local_Time_True'])
+    input_data['Local_sg_time'] = pd.to_datetime(input_data['Local_Time_True'], dayfirst=True)
     total_sequences_dict = {}
     max_seq_len = 0
     valid_visits = []
@@ -176,7 +176,7 @@ def generate_POI_dist_sequences(input_data, visit_sequence_dict):
                     dist_sequence.append(-1)
             user_dist_sequences.append(dist_sequence)
         dist_sequences.append(user_dist_sequences)
-    return np.array(dist_sequences), max_dist
+    return dist_sequences, max_dist
 
 
 # get distance between regions
@@ -202,7 +202,7 @@ def generate_region_dist_sequences(input_data, visit_sequence_dict):
                     dist_sequence.append(-1)
             user_dist_sequences.append(dist_sequence)
         dist_sequences.append(user_dist_sequences)
-    return np.array(dist_sequences), max_dist
+    return dist_sequences, max_dist
 
 
 # reindexed list for each user
@@ -245,7 +245,7 @@ def get_seq(data):
     POI_id_mapping = dict(zip(POI_counter.keys(), np.arange(len(POI_counter.keys()))))
     data['L2_id'] = data['Category'].apply(lambda x: cat_id_mapping[x])
     data['Location_id'] = data['VenueId'].apply(lambda x: POI_id_mapping[x])
-    data['hour'] = pd.to_datetime(data['Local_Time_True']).dt.hour
+    data['hour'] = pd.to_datetime(data['Local_Time_True'], dayfirst=True).dt.hour
     visit_sequences, max_seq_len, valid_visits, user_reIndex_mapping = generate_sequence(data, min_seq_len=2,
                                                                                          min_seq_num=3)
     assert bool(visit_sequences), 'no qualified sequence after filtering!'
@@ -374,19 +374,18 @@ def get_tr_va_te_data(data):
 
 # get the index of same- and cross region for region sequence
 def get_In_Cross_region_seq(region_sequences):
-    group_SameRegion_index = []
-    group_CrossRegion_index = []
+    regions = []
+    # group_CrossRegion_index=[]
     for x in region_sequences:
-        SameRegion_index = []
-        CrossRegion_index = []
+        region_group = []
+        # CrossRegion_index=[]
         for i in range(len(x)):
             if len(set(x[i])) == 1:
-                SameRegion_index.append(i)
+                region_group.append(1)
             else:
-                CrossRegion_index.append(i)
-        group_SameRegion_index.append(SameRegion_index)
-        group_CrossRegion_index.append(CrossRegion_index)
-    return group_SameRegion_index, group_CrossRegion_index
+                region_group.append(2)
+        regions.append(region_group)
+    return regions
 
 
 # get the data of same- and cross-region according to index.
@@ -544,3 +543,38 @@ def trans_to_cpu(variable):
         return variable.cpu()
     else:
         return variable
+
+
+def slice_data(data, max):
+    new_data = list()
+
+    for elem in data:
+        new_data.append(elem[:max])
+
+    return tuple(new_data)
+
+
+def flatten_data(data):
+    new_data = list()
+
+    for i, elem in enumerate(data):
+        new_data.append([
+            x
+            for xs in elem
+            for x in xs
+        ])
+
+    return new_data
+
+
+def increase_data(data):
+    for i in range(0, 6):
+        if i % 2 == 0:
+            for seq_idx, seq in enumerate(data[i]):
+                for elem_idx, elem in enumerate(seq):
+                    data[i][seq_idx][elem_idx] = elem + 1
+        else:
+            for elem_idx, elem in enumerate(data[i]):
+                data[i][elem_idx] = elem + 1
+
+    return data
