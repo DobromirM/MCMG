@@ -9,18 +9,19 @@ import collections
 import os
 from collections import defaultdict
 import progressbar
+from tqdm import tqdm
 
 
 # generate valid sequence for original data
-def generate_sequence(input_data, min_seq_len, min_seq_num):
+def generate_sequence(input_data, min_seq_len, min_seq_num, day_first):
     bar = progressbar.ProgressBar(maxval=input_data.index[-1],
                                   widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
-    input_data['Local_sg_time'] = pd.to_datetime(input_data['Local_Time_True'], dayfirst=True)
+    input_data['Local_sg_time'] = pd.to_datetime(input_data['Local_Time_True'], dayfirst=day_first)
     total_sequences_dict = {}
     max_seq_len = 0
     valid_visits = []
     bar.start()
-    for user in input_data['UserId'].unique():
+    for user in tqdm(input_data['UserId'].unique()):
         user_visits = input_data[input_data['UserId'] == user]
         user_sequences = []
         # find visit sequences for each user:
@@ -238,16 +239,17 @@ def _new_id_to_old(mapping, new_id):
 
 
 # get sequence for original data
-def get_seq(data):
+def get_seq(data, day_first):
     cat_counter = collections.Counter(data['Category'])
     POI_counter = collections.Counter(data['VenueId'])
     cat_id_mapping = dict(zip(cat_counter.keys(), np.arange(len(cat_counter.keys()))))
     POI_id_mapping = dict(zip(POI_counter.keys(), np.arange(len(POI_counter.keys()))))
     data['L2_id'] = data['Category'].apply(lambda x: cat_id_mapping[x])
     data['Location_id'] = data['VenueId'].apply(lambda x: POI_id_mapping[x])
-    data['hour'] = pd.to_datetime(data['Local_Time_True'], dayfirst=True).dt.hour
+    data['hour'] = pd.to_datetime(data['Local_Time_True'], dayfirst=day_first).dt.hour
     visit_sequences, max_seq_len, valid_visits, user_reIndex_mapping = generate_sequence(data, min_seq_len=2,
-                                                                                         min_seq_num=3)
+                                                                                         min_seq_num=3,
+                                                                                         day_first=day_first)
     assert bool(visit_sequences), 'no qualified sequence after filtering!'
     visit_sequences, ground_truth_dict = aug_sequence(visit_sequences, min_len=3)
     POI_sequences, POI_reIndex_mapping = generate_POI_sequences(data, visit_sequences)
@@ -303,9 +305,9 @@ def get_PreTarget(data):
 
 
 # get training, validation and testing data
-def get_tr_va_te_data(data):
+def get_tr_va_te_data(data, day_first):
     POI_sequences, cate_sequences, region_sequences, time_sequences, POI_dist_sequences, region_dist_sequences = get_seq(
-        data)
+        data, day_first)
     POI_training_samples, POI_validation_samples, POI_testing_samples, POI_training_validation_samples = get_training_testing(
         POI_sequences)
     region_training_samples, region_validation_samples, region_testing_samples, region_training_validation_samples = get_training_testing(

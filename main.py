@@ -11,88 +11,37 @@ args = parse_args()
 
 
 def main():
-    process_data = True
-    if process_data:
-        df = pd.read_csv("./dataset/CAL/CAL_checkin.csv")
-        train, _, _, test = get_tr_va_te_data(df)
+    df = pd.read_csv("./dataset/CAL/CAL_checkin.csv")
+    day_first = True
+    train, _, _, test = get_tr_va_te_data(df, day_first)
 
-        client_idxs = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+    client_idxs = [3]
 
-        train = slice_data(train, client_idxs)
-        test = slice_data(test, client_idxs)
+    client_train = slice_data(train, client_idxs)
+    client_test = slice_data(test, client_idxs)
 
-        train_data = increase_data(flatten_data(train))
-        test_data = increase_data(flatten_data(test))
+    train_data = increase_data(flatten_data(client_train))
+    test_data = increase_data(flatten_data(client_test))
 
-        train_regions = get_In_Cross_region_seq(train[4])
-        group_label_train = flatten_data((train_regions,))[0]
+    train_regions = get_In_Cross_region_seq(client_train[4])
+    group_label_train = flatten_data((train_regions,))[0]
 
-        test_regions = get_In_Cross_region_seq(test[4])
-        group_label_test = flatten_data((test_regions,))[0]
-        POI_n_node = max(max(train_data[1]), max(map(max, train_data[0]))) + 1
-        POI_adj_matrix = get_adj_matrix_InDegree(train_data[0], POI_n_node)
+    test_regions = get_In_Cross_region_seq(client_test[4])
+    group_label_test = flatten_data((test_regions,))[0]
+    POI_n_node = max(max(train_data[1]), max(map(max, train_data[0])), max(test_data[1]),
+                     max(map(max, test_data[0]))) + 1
+    POI_adj_matrix = get_adj_matrix_InDegree(train_data[0], POI_n_node)
 
-        cate_n_node = max(max(train_data[3]), max(map(max, train_data[2]))) + 1
-        regi_n_node = max(max(train_data[5]), max(map(max, train_data[4]))) + 1
-        time_n_node = max(max(train_data[7]), max(map(max, train_data[6]))) + 1
-        POI_dist_n_node = max(max(train_data[9]), max(map(max, train_data[8]))) + 1
-        regi_dist_n_node = max(max(train_data[11]), max(map(max, train_data[10]))) + 1
-
-
-    elif args.dataset == 'CAL':
-        train_data = pickle.load(open('./dataset/CAL/train_CAL.txt', 'rb'))
-        test_data = pickle.load(open('./dataset/CAL/test_CAL.txt', 'rb'))
-        group_label_train = pickle.load(open('./dataset/CAL/train_group_label_CAL.txt', 'rb'))
-        group_label_test = pickle.load(open('./dataset/CAL/test_group_label_CAL.txt', 'rb'))
-        POI_adj_matrix = pickle.load(open('./dataset/CAL/AdjacentMatrix_CAL.txt', 'rb'))
-        POI_n_node = 579
-        cate_n_node = 149
-        regi_n_node = 10
-        time_n_node = 25
-        POI_dist_n_node = 31
-        regi_dist_n_node = 31
-
-    elif args.dataset == 'PHO':
-        train_data = pickle.load(open('./dataset/PHO/train_PHO.txt', 'rb'))
-        test_data = pickle.load(open('./dataset/PHO/test_PHO.txt', 'rb'))
-        group_label_train = pickle.load(open('./dataset/PHO/train_group_label_PHO.txt', 'rb'))
-        group_label_test = pickle.load(open('./dataset/PHO/test_group_label_PHO.txt', 'rb'))
-        POI_adj_matrix = pickle.load(open('./dataset/PHO/AdjacentMatrix_PHO.txt', 'rb'))
-        POI_n_node = 1847
-        cate_n_node = 236
-        regi_n_node = 10
-        time_n_node = 25
-        POI_dist_n_node = 37
-        regi_dist_n_node = 37
-
-    elif args.dataset == 'SIN':
-        train_data = pickle.load(open('./dataset/SIN/train_SIN.txt', 'rb'))
-        test_data = pickle.load(open('./dataset/SIN/test_SIN.txt', 'rb'))
-        group_label_train = pickle.load(open('./dataset/SIN/train_group_label_SIN.txt', 'rb'))
-        group_label_test = pickle.load(open('./dataset/SIN/test_group_label_SIN.txt', 'rb'))
-        POI_adj_matrix = pickle.load(open('./dataset/SIN/AdjacentMatrix_SIN.txt', 'rb'))
-        POI_n_node = 9640
-        cate_n_node = 342
-        regi_n_node = 10
-        time_n_node = 25
-        POI_dist_n_node = 40
-        regi_dist_n_node = 40
-
-    elif args.dataset == 'NY':
-        train_data = pickle.load(open('./dataset/NY/train_NY.txt', 'rb'))
-        test_data = pickle.load(open('./dataset/NY/test_NY.txt', 'rb'))
-        group_label_train = pickle.load(open('./dataset/NY/train_group_label_NY.txt', 'rb'))
-        group_label_test = pickle.load(open('./dataset/NY/test_group_label_NY.txt', 'rb'))
-        POI_adj_matrix = pickle.load(open('./dataset/NY/AdjacentMatrix_NY.txt', 'rb'))
-        POI_n_node = 17655
-        cate_n_node = 391
-        regi_n_node = 10
-        time_n_node = 25
-        POI_dist_n_node = 45
-        regi_dist_n_node = 45
-
-    else:
-        raise ValueError(f'Invalid dataset')
+    cate_n_node = max(max(train_data[3]), max(map(max, train_data[2])), max(test_data[3]),
+                      max(map(max, test_data[2]))) + 1
+    regi_n_node = max(max(train_data[5]), max(map(max, train_data[4])), max(test_data[5]),
+                      max(map(max, test_data[4]))) + 1
+    time_n_node = max(max(train_data[7]), max(map(max, train_data[6])), max(test_data[7]),
+                      max(map(max, test_data[6]))) + 1
+    POI_dist_n_node = max(max(train_data[9]), max(map(max, train_data[8])), max(test_data[9]),
+                          max(map(max, test_data[8]))) + 1
+    regi_dist_n_node = max(max(train_data[11]), max(map(max, train_data[10])), max(test_data[11]),
+                           max(map(max, test_data[10]))) + 1
 
     POI_train_data = Data(train_data[0:2], shuffle=False)
     cate_train_data = Data(train_data[2:4], shuffle=False)

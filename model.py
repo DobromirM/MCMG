@@ -344,22 +344,22 @@ def train_test(model, POI_adj_matrix, POI_train_data, POI_test_data, cate_train_
             regi_dist_test_data, group_label_test)
         # POI
         POI_sub_items_1 = POI_scores.topk(1)[1]
-        POI_sub_items_5 = POI_scores.topk(5)[1]
-        POI_sub_items_10 = POI_scores.topk(10)[1]
+        POI_sub_items_5 = POI_scores.topk(min(POI_scores.shape[1] - 1, 5))[1]
+        POI_sub_items_10 = POI_scores.topk(min(POI_scores.shape[1] - 1, 10))[1]
         POI_sub_items_1 = trans_to_cpu(POI_sub_items_1).detach().numpy()
         POI_sub_items_5 = trans_to_cpu(POI_sub_items_5).detach().numpy()
         POI_sub_items_10 = trans_to_cpu(POI_sub_items_10).detach().numpy()
         # category
         cate_sub_items_1 = cate_scores.topk(1)[1]
-        cate_sub_items_5 = cate_scores.topk(5)[1]
-        cate_sub_items_10 = cate_scores.topk(10)[1]
+        cate_sub_items_5 = cate_scores.topk(min(cate_scores.shape[1] - 1, 5))[1]
+        cate_sub_items_10 = cate_scores.topk(min(cate_scores.shape[1] - 1, 10))[1]
         cate_sub_items_1 = trans_to_cpu(cate_sub_items_1).detach().numpy()
         cate_sub_items_5 = trans_to_cpu(cate_sub_items_5).detach().numpy()
         cate_sub_items_10 = trans_to_cpu(cate_sub_items_10).detach().numpy()
         # region
         regi_sub_items_1 = regi_scores.topk(1)[1]
-        regi_sub_items_5 = regi_scores.topk(5)[1]
-        regi_sub_items_9 = regi_scores.topk(9)[1]
+        regi_sub_items_5 = regi_scores.topk(min(regi_scores.shape[1], 5))[1]
+        regi_sub_items_9 = regi_scores.topk(min(regi_scores.shape[1], 10))[1]
         regi_sub_items_1 = trans_to_cpu(regi_sub_items_1).detach().numpy()
         regi_sub_items_5 = trans_to_cpu(regi_sub_items_5).detach().numpy()
         regi_sub_items_9 = trans_to_cpu(regi_sub_items_9).detach().numpy()
@@ -382,7 +382,7 @@ def train_test(model, POI_adj_matrix, POI_train_data, POI_test_data, cate_train_
                 regi_g2_groundtruth_num = regi_g2_groundtruth_num + 1
             else:
                 raise ValueError(f'Invalid group label')
-                # POI
+        # POI
         for i in range(len(POI_groundtruth)):
             if group_label_inputs[i] == 1:
                 g1_POI_HR_1.append(np.isin(POI_groundtruth[i] - 1, POI_sub_items_1[i][:]))
@@ -402,9 +402,9 @@ def train_test(model, POI_adj_matrix, POI_train_data, POI_test_data, cate_train_
                     break
                 else:
                     continue
-        POI_g1_NDCG_i /= POI_g1_groundtruth_num
+        POI_g1_NDCG_i /= max(POI_g1_groundtruth_num, 0.0001)
         g1_POI_NDCG_1.append(POI_g1_NDCG_i)
-        POI_g2_NDCG_i /= POI_g2_groundtruth_num
+        POI_g2_NDCG_i /= max(POI_g2_groundtruth_num, 0.0001)
         g2_POI_NDCG_1.append(POI_g2_NDCG_i)
         # category
         for i in range(len(cate_groundtruth)):
@@ -426,9 +426,9 @@ def train_test(model, POI_adj_matrix, POI_train_data, POI_test_data, cate_train_
                     break
                 else:
                     continue
-        cate_g1_NDCG_i /= cate_g1_groundtruth_num
+        cate_g1_NDCG_i /= max(cate_g1_groundtruth_num, 0.0001)
         g1_cate_NDCG_1.append(cate_g1_NDCG_i)
-        cate_g2_NDCG_i /= cate_g2_groundtruth_num
+        cate_g2_NDCG_i /= max(cate_g2_groundtruth_num, 0.0001)
         g2_cate_NDCG_1.append(cate_g2_NDCG_i)
         # region
         for i in range(len(regi_groundtruth)):
@@ -450,9 +450,9 @@ def train_test(model, POI_adj_matrix, POI_train_data, POI_test_data, cate_train_
                     break
                 else:
                     continue
-        regi_g1_NDCG_i /= regi_g1_groundtruth_num
+        regi_g1_NDCG_i /= max(regi_g1_groundtruth_num, 0.0001)
         g1_regi_NDCG_1.append(regi_g1_NDCG_i)
-        regi_g2_NDCG_i /= regi_g2_groundtruth_num
+        regi_g2_NDCG_i /= max(regi_g2_groundtruth_num, 0.0001)
         g2_regi_NDCG_1.append(regi_g2_NDCG_i)
         # top 5
         # POI
@@ -475,9 +475,9 @@ def train_test(model, POI_adj_matrix, POI_train_data, POI_test_data, cate_train_
                     break
                 else:
                     continue
-        POI_g1_NDCG_i_5 /= POI_g1_groundtruth_num
+        POI_g1_NDCG_i_5 /= max(POI_g1_groundtruth_num, 0.0001)
         g1_POI_NDCG_5.append(POI_g1_NDCG_i_5)
-        POI_g2_NDCG_i_5 /= POI_g2_groundtruth_num
+        POI_g2_NDCG_i_5 /= max(POI_g2_groundtruth_num, 0.0001)
         g2_POI_NDCG_5.append(POI_g2_NDCG_i_5)
         # category
         for i in range(len(cate_groundtruth)):
@@ -499,9 +499,9 @@ def train_test(model, POI_adj_matrix, POI_train_data, POI_test_data, cate_train_
                     break
                 else:
                     continue
-        cate_g1_NDCG_i_5 /= cate_g1_groundtruth_num
+        cate_g1_NDCG_i_5 /= max(cate_g1_groundtruth_num, 0.0001)
         g1_cate_NDCG_5.append(cate_g1_NDCG_i_5)
-        cate_g2_NDCG_i_5 /= cate_g2_groundtruth_num
+        cate_g2_NDCG_i_5 /= max(cate_g2_groundtruth_num, 0.0001)
         g2_cate_NDCG_5.append(cate_g2_NDCG_i_5)
         # region
         for i in range(len(regi_groundtruth)):
@@ -523,9 +523,9 @@ def train_test(model, POI_adj_matrix, POI_train_data, POI_test_data, cate_train_
                     break
                 else:
                     continue
-        regi_g1_NDCG_i_5 /= regi_g1_groundtruth_num
+        regi_g1_NDCG_i_5 /= max(regi_g1_groundtruth_num, 0.0001)
         g1_regi_NDCG_5.append(regi_g1_NDCG_i_5)
-        regi_g2_NDCG_i_5 /= regi_g2_groundtruth_num
+        regi_g2_NDCG_i_5 /= max(regi_g2_groundtruth_num, 0.0001)
         g2_regi_NDCG_5.append(regi_g2_NDCG_i_5)
         # top 10
         # POI
@@ -548,9 +548,9 @@ def train_test(model, POI_adj_matrix, POI_train_data, POI_test_data, cate_train_
                     break
                 else:
                     continue
-        g1_NDCG_i_10 /= POI_g1_groundtruth_num
+        g1_NDCG_i_10 /= max(POI_g1_groundtruth_num, 0.0001)
         g1_POI_NDCG_10.append(g1_NDCG_i_10)
-        g2_NDCG_i_10 /= POI_g2_groundtruth_num
+        g2_NDCG_i_10 /= max(POI_g2_groundtruth_num, 0.0001)
         g2_POI_NDCG_10.append(g2_NDCG_i_10)
         # category
         for i in range(len(cate_groundtruth)):
@@ -572,9 +572,9 @@ def train_test(model, POI_adj_matrix, POI_train_data, POI_test_data, cate_train_
                     break
                 else:
                     continue
-        cate_g1_NDCG_i_10 /= cate_g1_groundtruth_num
+        cate_g1_NDCG_i_10 /= max(cate_g1_groundtruth_num, 0.0001)
         g1_cate_NDCG_10.append(cate_g1_NDCG_i_10)
-        cate_g2_NDCG_i_10 /= cate_g2_groundtruth_num
+        cate_g2_NDCG_i_10 /= max(cate_g2_groundtruth_num, 0.0001)
         g2_cate_NDCG_10.append(cate_g2_NDCG_i_10)
         # region
         for i in range(len(regi_groundtruth)):
@@ -596,50 +596,57 @@ def train_test(model, POI_adj_matrix, POI_train_data, POI_test_data, cate_train_
                     break
                 else:
                     continue
-        regi_g1_NDCG_i_10 /= regi_g1_groundtruth_num
+        regi_g1_NDCG_i_10 /= max(regi_g1_groundtruth_num, 0.0001)
         g1_regi_NDCG_10.append(regi_g1_NDCG_i_10)
-        regi_g2_NDCG_i_10 /= regi_g2_groundtruth_num
+        regi_g2_NDCG_i_10 /= max(regi_g2_groundtruth_num, 0.0001)
         g2_regi_NDCG_10.append(regi_g2_NDCG_i_10)
-        # top1
-    g1_POI_HR_1 = np.mean(g1_POI_HR_1)
-    g1_POI_NDCG_1 = np.mean(g1_POI_NDCG_1)
-    g1_cate_HR_1 = np.mean(g1_cate_HR_1)
-    g1_cate_NDCG_1 = np.mean(g1_cate_NDCG_1)
-    g1_regi_HR_1 = np.mean(g1_regi_HR_1)
-    g1_regi_NDCG_1 = np.mean(g1_regi_NDCG_1)
+    # top1
+    g1_POI_HR_1 = mean(g1_POI_HR_1)
+    g1_POI_NDCG_1 = mean(g1_POI_NDCG_1)
+    g1_cate_HR_1 = mean(g1_cate_HR_1)
+    g1_cate_NDCG_1 = mean(g1_cate_NDCG_1)
+    g1_regi_HR_1 = mean(g1_regi_HR_1)
+    g1_regi_NDCG_1 = mean(g1_regi_NDCG_1)
 
-    g2_POI_HR_1 = np.mean(g2_POI_HR_1)
-    g2_POI_NDCG_1 = np.mean(g2_POI_NDCG_1)
-    g2_cate_HR_1 = np.mean(g2_cate_HR_1)
-    g2_cate_NDCG_1 = np.mean(g2_cate_NDCG_1)
-    g2_regi_HR_1 = np.mean(g2_regi_HR_1)
-    g2_regi_NDCG_1 = np.mean(g2_regi_NDCG_1)
+    g2_POI_HR_1 = mean(g2_POI_HR_1)
+    g2_POI_NDCG_1 = mean(g2_POI_NDCG_1)
+    g2_cate_HR_1 = mean(g2_cate_HR_1)
+    g2_cate_NDCG_1 = mean(g2_cate_NDCG_1)
+    g2_regi_HR_1 = mean(g2_regi_HR_1)
+    g2_regi_NDCG_1 = mean(g2_regi_NDCG_1)
     # top5
-    g1_POI_HR_5 = np.mean(g1_POI_HR_5)
-    g1_POI_NDCG_5 = np.mean(g1_POI_NDCG_5)
-    g1_cate_HR_5 = np.mean(g1_cate_HR_5)
-    g1_cate_NDCG_5 = np.mean(g1_cate_NDCG_5)
-    g1_regi_HR_5 = np.mean(g1_regi_HR_5)
-    g1_regi_NDCG_5 = np.mean(g1_regi_NDCG_5)
+    g1_POI_HR_5 = mean(g1_POI_HR_5)
+    g1_POI_NDCG_5 = mean(g1_POI_NDCG_5)
+    g1_cate_HR_5 = mean(g1_cate_HR_5)
+    g1_cate_NDCG_5 = mean(g1_cate_NDCG_5)
+    g1_regi_HR_5 = mean(g1_regi_HR_5)
+    g1_regi_NDCG_5 = mean(g1_regi_NDCG_5)
 
-    g2_POI_HR_5 = np.mean(g2_POI_HR_5)
-    g2_POI_NDCG_5 = np.mean(g2_POI_NDCG_5)
-    g2_cate_HR_5 = np.mean(g2_cate_HR_5)
-    g2_cate_NDCG_5 = np.mean(g2_cate_NDCG_5)
-    g2_regi_HR_5 = np.mean(g2_regi_HR_5)
-    g2_regi_NDCG_5 = np.mean(g2_regi_NDCG_5)
+    g2_POI_HR_5 = mean(g2_POI_HR_5)
+    g2_POI_NDCG_5 = mean(g2_POI_NDCG_5)
+    g2_cate_HR_5 = mean(g2_cate_HR_5)
+    g2_cate_NDCG_5 = mean(g2_cate_NDCG_5)
+    g2_regi_HR_5 = mean(g2_regi_HR_5)
+    g2_regi_NDCG_5 = mean(g2_regi_NDCG_5)
     # top10
-    g1_POI_HR_10 = np.mean(g1_POI_HR_10)
-    g1_POI_NDCG_10 = np.mean(g1_POI_NDCG_10)
-    g1_cate_HR_10 = np.mean(g1_cate_HR_10)
-    g1_cate_NDCG_10 = np.mean(g1_cate_NDCG_10)
-    g1_regi_HR_10 = np.mean(g1_regi_HR_10)
-    g1_regi_NDCG_10 = np.mean(g1_regi_NDCG_10)
+    g1_POI_HR_10 = mean(g1_POI_HR_10)
+    g1_POI_NDCG_10 = mean(g1_POI_NDCG_10)
+    g1_cate_HR_10 = mean(g1_cate_HR_10)
+    g1_cate_NDCG_10 = mean(g1_cate_NDCG_10)
+    g1_regi_HR_10 = mean(g1_regi_HR_10)
+    g1_regi_NDCG_10 = mean(g1_regi_NDCG_10)
 
-    g2_POI_HR_10 = np.mean(g2_POI_HR_10)
-    g2_POI_NDCG_10 = np.mean(g2_POI_NDCG_10)
-    g2_cate_HR_10 = np.mean(g2_cate_HR_10)
-    g2_cate_NDCG_10 = np.mean(g2_cate_NDCG_10)
-    g2_regi_HR_10 = np.mean(g2_regi_HR_10)
-    g2_regi_NDCG_10 = np.mean(g2_regi_NDCG_10)
+    g2_POI_HR_10 = mean(g2_POI_HR_10)
+    g2_POI_NDCG_10 = mean(g2_POI_NDCG_10)
+    g2_cate_HR_10 = mean(g2_cate_HR_10)
+    g2_cate_NDCG_10 = mean(g2_cate_NDCG_10)
+    g2_regi_HR_10 = mean(g2_regi_HR_10)
+    g2_regi_NDCG_10 = mean(g2_regi_NDCG_10)
     return g1_POI_HR_1, g1_POI_HR_5, g1_POI_HR_10, g1_POI_NDCG_1, g1_POI_NDCG_5, g1_POI_NDCG_10, g1_cate_HR_1, g1_cate_HR_5, g1_cate_HR_10, g1_cate_NDCG_1, g1_cate_NDCG_5, g1_cate_NDCG_10, g1_regi_HR_1, g1_regi_HR_5, g1_regi_HR_10, g1_regi_NDCG_1, g1_regi_NDCG_5, g1_regi_NDCG_10, g2_POI_HR_1, g2_POI_HR_5, g2_POI_HR_10, g2_POI_NDCG_1, g2_POI_NDCG_5, g2_POI_NDCG_10, g2_cate_HR_1, g2_cate_HR_5, g2_cate_HR_10, g2_cate_NDCG_1, g2_cate_NDCG_5, g2_cate_NDCG_10, g2_regi_HR_1, g2_regi_HR_5, g2_regi_HR_10, g2_regi_NDCG_1, g2_regi_NDCG_5, g2_regi_NDCG_10
+
+
+def mean(data):
+    if len(data) == 0:
+        return np.mean([0])
+    else:
+        return np.mean(data)
